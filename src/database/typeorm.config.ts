@@ -25,11 +25,13 @@ export function buildTypeOrmModuleOptions(
   }
 
   const databaseUrl = configService.get<string>('DATABASE_URL');
+  const normalizedUrl =
+    typeof databaseUrl === 'string' ? databaseUrl.trim() : undefined;
 
-  if (databaseUrl) {
+  if (normalizedUrl) {
     return {
       type: 'postgres',
-      url: databaseUrl,
+      url: normalizedUrl,
       autoLoadEntities: true,
       migrations: MIGRATIONS,
       migrationsRun: false,
@@ -62,12 +64,12 @@ export function buildTypeOrmModuleOptions(
 
 export function buildDataSourceOptionsFromEnv(): DataSourceOptions {
   const config = databaseConnectionFactory();
-  const databaseUrl = process.env.DATABASE_URL;
+  const normalizedUrl = process.env.DATABASE_URL?.trim();
 
-  if (databaseUrl) {
+  if (normalizedUrl) {
     return {
       type: 'postgres',
-      url: databaseUrl,
+      url: normalizedUrl,
       entities: [User],
       migrations: MIGRATIONS,
       migrationsRun: false,
