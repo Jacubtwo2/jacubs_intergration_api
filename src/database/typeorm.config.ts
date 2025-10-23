@@ -41,6 +41,18 @@ export function buildTypeOrmModuleOptions(
 
   const connection = databaseConnectionFactory();
 
+  if (!connection.username) {
+    throw new Error(
+      'DB_USER is required when DATABASE_URL is not provided. Please supply the credential or set DATABASE_URL.',
+    );
+  }
+
+  if (!connection.database) {
+    throw new Error(
+      'DB_NAME is required when DATABASE_URL is not provided. Please supply the database name or set DATABASE_URL.',
+    );
+  }
+
   return {
     type: 'postgres',
     host: connection.host,
@@ -74,6 +86,18 @@ export function buildDataSourceOptionsFromEnv(): DataSourceOptions {
       migrations: MIGRATIONS,
       migrationsRun: false,
     } as DataSourceOptions;
+  }
+
+  if (!config.username) {
+    throw new Error(
+      'DB_USER is required when DATABASE_URL is not provided. Please supply the credential or set DATABASE_URL.',
+    );
+  }
+
+  if (!config.database) {
+    throw new Error(
+      'DB_NAME is required when DATABASE_URL is not provided. Please supply the database name or set DATABASE_URL.',
+    );
   }
 
   return {

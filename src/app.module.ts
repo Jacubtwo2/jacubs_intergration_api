@@ -7,8 +7,6 @@ import { AppConfigModule } from './config/config.module';
 import { buildTypeOrmModuleOptions } from './database/typeorm.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { DATABASE_CONNECTION } from './database/database.constants';
-import { databaseConnectionFactory } from './database/database.factory';
 
 @Module({
   imports: [
