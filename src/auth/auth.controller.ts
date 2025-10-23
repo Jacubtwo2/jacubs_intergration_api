@@ -45,6 +45,7 @@ export class AuthController {
     description:
       'Registers a new user and returns an authenticated session with access credentials.',
   })
+  @ApiBody({ type: SignupDto })
   @ApiCreatedResponse({
     description: 'Account created successfully.',
     type: AuthSessionResponseDto,
