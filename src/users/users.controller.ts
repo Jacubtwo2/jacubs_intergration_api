@@ -18,11 +18,19 @@ import { extname, join } from 'path';
 import { mkdir } from 'fs';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UsersService, SafeUser } from './users.service';
+import { UsersService } from './users.service';
+import type { SafeUser } from './users.service';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { FilesService } from '../files/files.service';
 
 const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+type UploadedProfileImage = {
+  readonly filename: string;
+  readonly mimetype: string;
+  readonly size: number;
+  readonly originalname: string;
+};
 
 @ApiTags('Users')
 @ApiBearerAuth('access-token')
@@ -86,7 +94,7 @@ export class UsersController {
         ],
       }),
     )
-    file: Express.Multer.File,
+    file: UploadedProfileImage,
   ) {
     await this.filesService.removeFileByUrl(user.profileImageUrl);
     const publicUrl = this.filesService.buildProfileImageUrl(user.id, file.filename);

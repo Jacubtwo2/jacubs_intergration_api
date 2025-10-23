@@ -1,10 +1,11 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Injectable,
-  TooManyRequestsException,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 interface AttemptTracker {
   readonly expiresAt: number;
@@ -39,8 +40,9 @@ export class RateLimitGuard implements CanActivate {
     }
 
     if (tracker.count >= MAX_ATTEMPTS) {
-      throw new TooManyRequestsException(
+      throw new HttpException(
         'Too many login attempts detected. Please try again in a few minutes.',
+        HttpStatus.TOO_MANY_REQUESTS,
       );
     }
 
