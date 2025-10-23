@@ -21,6 +21,13 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: DATABASE_CONNECTION,
+      useFactory: databaseConnectionFactory,
+    },
+  ],
+  exports: [DATABASE_CONNECTION],
 })
 export class AppModule {}
