@@ -115,9 +115,9 @@ export function setupOpenApiDocs(app: INestApplication, { apiVersion }: SetupOpe
     res.setHeader('Cache-Control', 'no-store');
     res.send(
       buildSwaggerUiHtml(
-        document.info?.title as string,
+        document.info.title,
         jsonRoute,
-        (document.info?.description as string) ?? 'Interactive API documentation.',
+        document.info.description ?? 'Interactive API documentation.',
       ),
     );
   });

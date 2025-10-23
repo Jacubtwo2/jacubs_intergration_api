@@ -2,7 +2,19 @@ export interface BuildOpenApiDocumentOptions {
   apiVersion: string;
 }
 
-export type OpenApiDocument = Record<string, unknown>;
+export interface OpenApiDocument {
+  openapi: string;
+  info: {
+    title: string;
+    version: string;
+    description: string;
+    contact: {
+      name: string;
+      email: string;
+    };
+  };
+  [key: string]: unknown;
+}
 
 const API_TITLE = 'Jacubs Integration API';
 const API_DESCRIPTION =
