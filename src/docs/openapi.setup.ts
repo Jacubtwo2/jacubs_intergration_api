@@ -98,7 +98,7 @@ function buildSwaggerUiHtml(title: string, specUrl: string, description: string)
 }
 
 export function setupOpenApiDocs(app: INestApplication, { apiVersion }: SetupOpenApiDocsOptions): void {
-  const document = buildOpenApiDocument({ apiVersion });
+  const document = buildOpenApiDocument(app, { apiVersion });
   const jsonRoute = `/${apiVersion}/docs/openapi.json`;
   const docsRoute = `/${apiVersion}/docs`;
   const httpAdapter = app.getHttpAdapter();
