@@ -14,12 +14,14 @@ export function buildOpenApiDocument(
   app: INestApplication,
   { apiVersion }: BuildOpenApiDocumentOptions,
 ): OpenAPIObject {
+  const semanticVersion = apiVersion.replace(/^api\//iu, '').trim() || '1.0.0';
+
   const config = new DocumentBuilder()
     .setTitle(API_TITLE)
     .setDescription(API_DESCRIPTION)
-    .setVersion(apiVersion)
+    .setVersion(semanticVersion)
     .setContact('Jacubs Platform Support', 'https://jacubs.example', 'support@jacubs.example')
-    .addServer(`/${apiVersion}`, 'Primary API gateway (versioned)')
+    .addServer('/', 'Primary API gateway')
     .addBearerAuth(
       {
         type: 'http',
