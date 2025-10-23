@@ -34,7 +34,7 @@ export function buildTypeOrmModuleOptions(
       url: normalizedUrl,
       autoLoadEntities: true,
       migrations: MIGRATIONS,
-      migrationsRun: false,
+      migrationsRun: true,
       synchronize: false,
     };
   }
@@ -63,7 +63,7 @@ export function buildTypeOrmModuleOptions(
     ssl: connection.ssl ? { rejectUnauthorized: false } : false,
     autoLoadEntities: true,
     migrations: MIGRATIONS,
-    migrationsRun: false,
+    migrationsRun: true,
     synchronize: false,
     extra: {
       min: connection.pool.min,
