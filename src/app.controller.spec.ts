@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { AppService, ApiStatusResponse } from './app.service';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -14,9 +14,24 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('status', () => {
+    it('should describe the running API', () => {
+      const payload: ApiStatusResponse = appController.getStatus();
+
+      expect(payload).toEqual(
+        expect.objectContaining({
+          status: 'ok',
+          service: 'Jacubs Integration API',
+          version: expect.any(String),
+          docs: expect.objectContaining({
+            url: expect.stringContaining('/docs'),
+          }),
+        }),
+      );
+
+      expect(payload.timestamp).toEqual(expect.any(String));
+      expect(payload.uptime.seconds).toEqual(expect.any(Number));
+      expect(payload.uptime.humanReadable).toEqual(expect.any(String));
     });
   });
 });

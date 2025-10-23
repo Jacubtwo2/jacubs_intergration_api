@@ -1,98 +1,134 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Jacubs Integration API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Production-ready NestJS service that provides a complete authentication and user profile experience with PostgreSQL, TypeORM, and Swagger-powered documentation. The API supports signup, login, JWT access/refresh token flows, profile management, and secure profile image uploads.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **Robust auth flow** with signup, login, refresh rotation, and logout powered by access & refresh JWT tokens.
+- **Secure credential storage** using bcrypt (with a crypto-based fallback for local environments where native bindings are unavailable).
+- **Users module** exposing profile read/update endpoints plus profile image upload (validated PNG/JPEG, 5 MB max, stored under `/uploads`).
+- **PostgreSQL via TypeORM** with a dedicated users migration and repository-backed services.
+- **Security middleware** including Helmet, CORS (configurable origin), secure HTTP-only refresh cookies, and a rate limit guard on login attempts.
+- **OpenAPI documentation** served from the versioned API prefix with an API Dog–inspired Swagger UI shell.
+- **Comprehensive tests** covering AuthService units and an end-to-end happy path for the entire auth lifecycle.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Scaffolding & Dependencies
 
-## Project setup
+To reproduce the project locally from scratch, run the following commands:
 
 ```bash
-$ npm install
+nest new my-api
+cd my-api
+npm i @nestjs/typeorm typeorm pg
+npm i @nestjs/jwt @nestjs/passport passport passport-jwt
+npm i class-validator class-transformer bcrypt helmet
+npm i -D @types/bcrypt
+npm i multer @nestjs/platform-express
+npm i @nestjs/config
 ```
 
-## Compile and run the project
+The repository already contains the configured modules, DTOs, guards, and tests—clone it directly if you want the finished implementation.
+
+## Getting Started
+
+1. Install dependencies (internet access required for the first install):
+
+   ```bash
+   npm install
+   ```
+
+2. Copy the environment template and adjust values for your stack:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. Ensure your PostgreSQL instance has the `uuid-ossp` extension enabled (required for UUID primary keys).
+
+4. Run the users migration:
+
+   ```bash
+   npm run migration:run
+   ```
+
+5. Start the API:
+
+   ```bash
+   npm run start:dev
+   ```
+
+   The API listens on `http://localhost:3001` by default and is automatically prefixed with the configured `API_VERSION` (e.g. `/api/v1`). Swagger documentation is available at `/{API_VERSION}/docs`.
+
+## Testing
 
 ```bash
-# development
-$ npm run start
+# Unit tests (AuthService coverage)
+npm run test
 
-# watch mode
-$ npm run start:dev
+# End-to-end auth journey
+npm run test:e2e
 
-# production mode
-$ npm run start:prod
+# Coverage report
+npm run test:cov
 ```
 
-## Run tests
+> **Note:** In constrained environments where native `bcrypt` bindings cannot be installed, the service falls back to a crypto-based password hasher. The production deployment should still install `bcrypt` to take advantage of its mature hashing guarantees.
+
+## Example Requests
+
+All endpoints are served under the configured API version (e.g. `/api/v1`). Replace `<JWT>` placeholders with the returned access tokens.
 
 ```bash
-# unit tests
-$ npm run test
+# Signup
+curl -X POST http://localhost:3001/api/v1/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Ada",
+    "lastName": "Lovelace",
+    "email": "ada@example.com",
+    "password": "Secure123",
+    "confirmPassword": "Secure123"
+  }' -i
 
-# e2e tests
-$ npm run test:e2e
+# Login
+curl -X POST http://localhost:3001/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{ "email": "ada@example.com", "password": "Secure123" }' -i
 
-# test coverage
-$ npm run test:cov
+# Refresh (requires refresh_token cookie from the previous response)
+curl -X POST http://localhost:3001/api/v1/auth/refresh \
+  -H "Cookie: refresh_token=<refresh-cookie-value>" -i
+
+# Get current profile
+curl http://localhost:3001/api/v1/users/me \
+  -H "Authorization: Bearer <JWT>"
+
+# Update profile details
+curl -X PATCH http://localhost:3001/api/v1/users/me \
+  -H "Authorization: Bearer <JWT>" \
+  -H "Content-Type: application/json" \
+  -d '{ "phone": "+12065551234", "bio": "Lifelong mathematician." }'
+
+# Upload profile image (PNG/JPEG only)
+curl -X POST http://localhost:3001/api/v1/users/me/profile-image \
+  -H "Authorization: Bearer <JWT>" \
+  -F "file=@profile.png"
+
+# Logout (clears refresh cookie and revokes stored hash)
+curl -X POST http://localhost:3001/api/v1/auth/logout \
+  -H "Authorization: Bearer <JWT>" -i
 ```
 
-## Deployment
+## Security Highlights
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- Global validation pipe with whitelist & transformation.
+- Helmet, CORS with configurable origin, and static assets served from `/uploads`.
+- Secure, HTTP-only `refresh_token` cookie (`SameSite=Lax`, secure flag configurable via env).
+- Login rate limiting (5 attempts per 15 minutes per IP/email combo).
+- JWT access tokens (15 minutes) and refresh tokens (7 days) with rotation enforcement.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Additional Notes
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- The uploads directory (`/uploads`) is served statically for development convenience. Swap the `FilesService` implementation to store images in S3 or another provider when moving to production.
+- The OpenAPI document is generated directly from the Nest controllers and DTOs so it stays in sync with the codebase.
+- Use `npm run migration:revert` to roll back the latest TypeORM migration if needed.
